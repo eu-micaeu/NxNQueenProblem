@@ -137,20 +137,5 @@ public class NxNQueens {
         List<int[]> solucoes = nRainhas.getSolucoes(); // Obtém todas as soluções
         System.out.println("Número de soluções: " + solucoes.size()); // Exibe o número de soluções encontradas
         System.out.println("Tempo de execução: " + duracao + " ms"); // Exibe o tempo de execução
-
-        // Imprime cada solução no formato de tabuleiro NxN
-        for (int[] solucao : solucoes) {
-            for (int i = 0; i < solucao.length; i++) {
-                for (int j = 0; j < solucao.length; j++) {
-                    if (solucao[i] == j) {
-                        System.out.print("Q "); // Exibe 'Q' para a posição da rainha
-                    } else {
-                        System.out.print(". "); // Exibe '.' para posições vazias
-                    }
-                }
-                System.out.println(); // Nova linha para cada linha do tabuleiro
-            }
-            System.out.println(); // Linha em branco entre soluções
-        }
     }
 }

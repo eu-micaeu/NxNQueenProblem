@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class NxNQueensParallel {
+    
     private int[][] tabuleiro; // Tabuleiro NxN representado por uma matriz de inteiros
     private List<int[]> solucoes; // Lista para armazenar todas as soluções encontradas
     private int tamanho; // Tamanho do tabuleiro (NxN)
@@ -157,18 +158,5 @@ public class NxNQueensParallel {
         System.out.println("Número de soluções: " + solucoes.size());
         System.out.println("Tempo de execução: " + duracao + " ms");
 
-        for (int[] solucao : solucoes) {
-            for (int i = 0; i < solucao.length; i++) {
-                for (int j = 0; j < solucao.length; j++) {
-                    if (solucao[i] == j) {
-                        System.out.print("Q ");
-                    } else {
-                        System.out.print(". ");
-                    }
-                }
-                System.out.println();
-            }
-            System.out.println();
-        }
     }
 }
