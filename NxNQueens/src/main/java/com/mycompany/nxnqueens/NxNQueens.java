@@ -125,17 +125,9 @@ public class NxNQueens {
         int tamanho = 15; // Tamanho do tabuleiro (NxN)
         NxNQueens nRainhas = new NxNQueens(tamanho); // Cria uma instância do problema NxN Queens
 
-        // Início da medição do tempo
-        long inicio = System.nanoTime();
-
         nRainhas.resolver(); // Resolve o problema
 
-        // Fim da medição do tempo
-        long fim = System.nanoTime();
-        long duracao = (fim - inicio) / 1_000_000; // Calcula a duração em milissegundos
-
         List<int[]> solucoes = nRainhas.getSolucoes(); // Obtém todas as soluções
-        System.out.println("Número de soluções: " + solucoes.size()); // Exibe o número de soluções encontradas
-        System.out.println("Tempo de execução: " + duracao + " ms"); // Exibe o tempo de execução
+        System.out.println("Numero de solucoes: " + solucoes.size()); // Exibe o número de soluções encontradas
     }
 }
