@@ -122,7 +122,7 @@ public class NxNQueens {
 
     // Método principal para executar o programa
     public static void main(String[] args) {
-        int tamanho = 15; // Tamanho do tabuleiro (NxN)
+        int tamanho = 10; // Tamanho do tabuleiro (NxN)
         NxNQueens nRainhas = new NxNQueens(tamanho); // Cria uma instância do problema NxN Queens
 
         nRainhas.resolver(); // Resolve o problema

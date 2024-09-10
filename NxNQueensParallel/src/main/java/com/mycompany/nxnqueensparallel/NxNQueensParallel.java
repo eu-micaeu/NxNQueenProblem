@@ -2,84 +2,82 @@ package com.mycompany.nxnqueensparallel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.ForkJoinPool;
 
 public class NxNQueensParallel {
-    private ConcurrentLinkedQueue<int[]> solucoes; // Lista thread-safe para armazenar todas as soluções encontradas
-    private int tamanho; // Tamanho do tabuleiro (NxN)
-    private ForkJoinPool pool; // Pool de threads para execução paralela
 
-    public NxNQueensParallel(int tamanho) {
-        this.tamanho = tamanho;
-        this.solucoes = new ConcurrentLinkedQueue<>();
-        this.pool = new ForkJoinPool();
+    // Cria um pool de threads ForkJoinPool para executar tarefas em paralelo
+    private static final ForkJoinPool pool = new ForkJoinPool();
+
+    public static void main(String[] args) {
+        
+        int n = 12; // Tamanho do tabuleiro NxN. Pode ser alterado para outro valor de N
+        
+        // Submete a tarefa inicial ao pool para encontrar todas as soluções
+        List<int[]> solutions = pool.invoke(new NQueensTask(new int[0], n));
+        
+        // Imprime o número total de soluções encontradas
+        System.out.println("Total de solucoes: " + solutions.size());
+        
     }
 
-    public void resolver() {
-        pool.invoke(new PosicionarRainhasTask(0, new int[tamanho], 0)); // Inicia a solução
-    }
+    // Tarefa recursiva para resolver o problema das N-rainhas
+    private static class NQueensTask extends RecursiveTask<List<int[]>> {
+        
+        private final int[] rainhas; // Configuração atual das rainhas no tabuleiro
+        
+        private final int n; // Tamanho do tabuleiro NxN
 
-    // Classe interna para representar a tarefa de posicionamento de rainhas
-    private class PosicionarRainhasTask extends RecursiveTask<Void> {
-        private final int linha;
-        private final int[] rainhas;
-        private final int profundidade;
-
-        public PosicionarRainhasTask(int linha, int[] rainhas, int profundidade) {
-            this.linha = linha;
-            this.rainhas = rainhas.clone(); // Usa uma cópia do array unidimensional
-            this.profundidade = profundidade;
+        // Construtor da tarefa
+        NQueensTask(int[] rainhas, int n) {
+            
+            this.rainhas = rainhas;
+            
+            this.n = n;
+            
         }
 
         @Override
-        protected Void compute() {
-            if (linha == tamanho) {
-                solucoes.add(rainhas.clone()); // Adiciona a solução encontrada
-                return null;
-            }
+        protected List<int[]> compute() {
+           
+            List<int[]> solucoes = new ArrayList<>(); // Lista para armazenar as soluções encontradas
 
-            List<PosicionarRainhasTask> tarefas = new ArrayList<>();
+            // Se o número de rainhas é igual ao tamanho do tabuleiro, adiciona a solução
+            if (rainhas.length == n) {
+                solucoes.add(rainhas);
+            } else {
+                List<NQueensTask> subtarefas = new ArrayList<>(); // Lista de subtarefas a serem executadas
 
-            for (int coluna = 0; coluna < tamanho; coluna++) {
-                if (ehSeguro(linha, coluna)) {
-                    rainhas[linha] = coluna; // Posiciona a rainha
-                    if (profundidade < 2) { // Ajuste a profundidade para controlar o paralelismo
-                        PosicionarRainhasTask tarefa = new PosicionarRainhasTask(linha + 1, rainhas, profundidade + 1);
-                        tarefas.add(tarefa);
-                    } else {
-                        new PosicionarRainhasTask(linha + 1, rainhas, profundidade + 1).compute();
+                // Tenta colocar uma rainha em cada coluna da próxima linha
+                for (int i = 0; i < n; i++) {
+                    // Verifica se é válido colocar uma rainha na coluna 'i'
+                    if (ehValido(rainhas, i)) {
+                        // Cria uma nova configuração de rainhas com a nova rainha adicionada
+                        int[] novasRainhas = new int[rainhas.length + 1];
+                        System.arraycopy(rainhas, 0, novasRainhas, 0, rainhas.length);
+                        novasRainhas[rainhas.length] = i;
+                        // Adiciona uma nova subtarefa para a configuração atualizada
+                        subtarefas.add(new NQueensTask(novasRainhas, n));
                     }
                 }
+                // Executa todas as subtarefas e agrega os resultados das soluções
+                invokeAll(subtarefas).forEach(tarefa -> solucoes.addAll(tarefa.join()));
             }
-
-            invokeAll(tarefas);
-            return null;
+            return solucoes; // Retorna a lista de soluções encontradas
         }
 
-        private boolean ehSeguro(int linha, int coluna) {
+        // Verifica se é válido colocar uma rainha na coluna 'coluna' da linha atual
+        private boolean ehValido(int[] rainhas, int coluna) {
+            int linha = rainhas.length; // A linha onde a rainha será colocada
+            // Verifica conflitos com as rainhas já colocadas
             for (int i = 0; i < linha; i++) {
-                int outrasColunas = rainhas[i];
-                if (outrasColunas == coluna || Math.abs(outrasColunas - coluna) == linha - i) {
-                    return false;
+                // Verifica se há uma rainha na mesma coluna ou na mesma diagonal
+                if (rainhas[i] == coluna || Math.abs(rainhas[i] - coluna) == linha - i) {
+                    return false; // Conflito encontrado
                 }
             }
-            return true;
+            return true; // Nenhum conflito encontrado
         }
-    }
-
-    public List<int[]> getSolucoes() {
-        return new ArrayList<>(solucoes); // Converte a lista thread-safe em uma lista normal
-    }
-
-    public static void main(String[] args) {
-        int tamanho = 15;
-        NxNQueensParallel nRainhas = new NxNQueensParallel(tamanho);
-
-        nRainhas.resolver();
-
-        List<int[]> solucoes = nRainhas.getSolucoes();
-        System.out.println("Numero de solucoes: " + solucoes.size());
     }
 }
